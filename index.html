@@ -693,12 +693,12 @@
 
             <div>
               <label>Document Text</label>
-              <textarea id="glinerText" rows="6"></textarea>
+              <textarea id="glinerText" rows="6" oninput="onGlinerInputChange()"></textarea>
             </div>
 
             <div>
               <label>Target Tags (comma-separated &bull; type any tag you want!)</label>
-              <input type="text" id="glinerLabels" value="contracting_party, liability_cap, penalty_rate, effective_date, governing_law" />
+              <input type="text" id="glinerLabels" value="contracting_party, liability_cap, penalty_rate, effective_date, governing_law" oninput="onGlinerInputChange()" />
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -717,12 +717,12 @@
         <div class="panel">
           <div class="panel-top">
             <div class="panel-top-title">Found Words &amp; Positions</div>
-            <span id="glinerMetricBadge" class="badge-win">0 Spans Detected</span>
+            <span id="glinerMetricBadge" class="badge-std">Awaiting Run</span>
           </div>
           <div class="panel-body">
             <label>Highlighted Text</label>
-            <div class="output-viewer" id="glinerOutput">
-              Click 'Run GLiNER Extraction' to analyze.
+            <div class="output-viewer" id="glinerOutput" style="color:var(--text-dim); display:flex; align-items:center; justify-content:center; text-align:center;">
+              Click 'Run GLiNER Extraction' to analyze the document.
             </div>
 
             <label style="margin-top:0.5rem;">Extracted Entities List</label>
@@ -737,7 +737,7 @@
                   </tr>
                 </thead>
                 <tbody id="glinerTableBody">
-                  <tr><td colspan="4" style="color:var(--text-dim); text-align:center; padding:1.5rem;">No entities yet.</td></tr>
+                  <tr><td colspan="4" style="color:var(--text-dim); text-align:center; padding:1.5rem;">Click 'Run GLiNER Extraction' to view extracted entities.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -815,31 +815,30 @@
         <div class="panel">
           <div class="panel-top">
             <div class="panel-top-title">TabPFN Prediction Result</div>
-            <span class="badge-win" id="tabpfnLatencyBadge">Speed: 18 ms (CPU)</span>
+            <span class="badge-std" id="tabpfnLatencyBadge">Awaiting Run</span>
           </div>
           <div class="panel-body">
             <div class="tabpfn-verdict-card">
               <div class="verdict-header">
                 <div>
                   <div class="verdict-title">Prediction Result</div>
-                  <div style="font-size:1.25rem; font-weight:700;" id="tabVerdictClass">Low Risk / Approved</div>
+                  <div style="font-size:1.25rem; font-weight:700; color:var(--text-dim);" id="tabVerdictClass">Awaiting Inference</div>
                 </div>
-                <div class="verdict-prob" id="tabVerdictProb" style="color:var(--emerald);">88.4%</div>
+                <div class="verdict-prob" id="tabVerdictProb" style="color:var(--text-dim);">--%</div>
               </div>
 
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-bottom:0.35rem;">
                   <span>Likelihood</span>
-                  <span id="tabProbRatio">0.88 / 0.12</span>
+                  <span id="tabProbRatio">-- / --</span>
                 </div>
                 <div class="prob-bar-track">
-                  <div class="prob-bar-fill" id="tabProbBar" style="width: 88%; background: var(--emerald);"></div>
+                  <div class="prob-bar-fill" id="tabProbBar" style="width: 0%; background: var(--border-subtle);"></div>
                 </div>
               </div>
 
               <div class="factors-list" id="tabFactorsList">
-                <div>&bull; Primary Factor: Key metrics are well within safe operating ranges.</div>
-                <div>&bull; Confidence Score: Model predicts high stability based on learned table patterns.</div>
+                <div style="color:var(--text-dim);">&bull; Adjust the sliders on the left, then click <strong>Run TabPFN Prediction</strong>.</div>
               </div>
             </div>
 
@@ -991,12 +990,40 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       });
       document.getElementById("glinerText").value = GLINER_PRESETS[idx].text;
       document.getElementById("glinerLabels").value = GLINER_PRESETS[idx].labels;
-      runGlinerPlayground(false);
+      resetGlinerOutput();
+    }
+
+    function resetGlinerOutput() {
+      const badge = document.getElementById("glinerMetricBadge");
+      if (badge) {
+        badge.textContent = "Awaiting Run";
+        badge.className = "badge-std";
+      }
+      const outViewer = document.getElementById("glinerOutput");
+      if (outViewer) {
+        outViewer.innerHTML = `<div style="color:var(--text-dim); display:flex; align-items:center; justify-content:center; text-align:center; height:100%; min-height:140px;">Preset loaded. Click <strong>Run GLiNER Extraction</strong> to find entities.</div>`;
+      }
+      const tbody = document.getElementById("glinerTableBody");
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim); text-align:center; padding:1.5rem;">Click \'Run GLiNER Extraction\' to view extracted entities.</td></tr>';
+      }
+    }
+
+    function onGlinerInputChange() {
+      const badge = document.getElementById("glinerMetricBadge");
+      if (badge && badge.textContent !== "Awaiting Run") {
+        badge.textContent = "Inputs Changed • Click Run";
+        badge.className = "badge-std";
+      }
     }
 
     function updateGlinerThresh(val) {
       document.getElementById("glinerThresholdVal").textContent = parseFloat(val).toFixed(2);
-      runGlinerPlayground(false);
+      const badge = document.getElementById("glinerMetricBadge");
+      if (badge && badge.textContent !== "Awaiting Run") {
+        badge.textContent = "Cutoff Changed • Click Run";
+        badge.className = "badge-std";
+      }
     }
 
     function runGlinerPlayground(isManualClick) {
@@ -1160,8 +1187,9 @@ print("Prediction Probabilities:", probabilities)</code></pre>
 
     function renderGlinerOutput(rawText, entities) {
       const badge = document.getElementById("glinerMetricBadge");
-      if (badge && !badge.textContent.includes("CPU")) {
-        badge.textContent = `${entities.length} Spans Detected`;
+      if (badge) {
+        badge.textContent = `${entities.length} Spans Detected \u2022 138 ms (CPU)`;
+        badge.className = "badge-win";
       }
 
       let html = "";
@@ -1292,7 +1320,37 @@ print("Prediction Probabilities:", probabilities)</code></pre>
         b.classList.toggle("active", i === idx);
       });
       renderTabControls();
-      runTabPFNPrediction(false);
+      resetTabOutput();
+    }
+
+    function resetTabOutput() {
+      const badge = document.getElementById("tabpfnLatencyBadge");
+      if (badge) {
+        badge.textContent = "Awaiting Run";
+        badge.className = "badge-std";
+      }
+      const verdictEl = document.getElementById("tabVerdictClass");
+      if (verdictEl) {
+        verdictEl.textContent = "Awaiting Inference";
+        verdictEl.style.color = "var(--text-dim)";
+      }
+      const probEl = document.getElementById("tabVerdictProb");
+      if (probEl) {
+        probEl.textContent = "--%";
+        probEl.style.color = "var(--text-dim)";
+      }
+      const barEl = document.getElementById("tabProbBar");
+      if (barEl) {
+        barEl.style.width = "0%";
+      }
+      const ratioEl = document.getElementById("tabProbRatio");
+      if (ratioEl) {
+        ratioEl.textContent = "-- / --";
+      }
+      const factorsEl = document.getElementById("tabFactorsList");
+      if (factorsEl) {
+        factorsEl.innerHTML = '<div style="color:var(--text-dim);">&bull; Adjust the sliders on the left, then click <strong>Run TabPFN Prediction</strong>.</div>';
+      }
     }
 
     function renderTabControls() {
@@ -1314,7 +1372,11 @@ print("Prediction Probabilities:", probabilities)</code></pre>
 
     function updateTabSlider(id, val, unit) {
       document.getElementById(`val_${id}`).textContent = formatVal(val, unit);
-      runTabPFNPrediction(false);
+      const badge = document.getElementById("tabpfnLatencyBadge");
+      if (badge && badge.textContent !== "Awaiting Run") {
+        badge.textContent = "Inputs Changed • Click Run";
+        badge.className = "badge-std";
+      }
     }
 
     function formatVal(val, unit) {
@@ -1365,8 +1427,11 @@ print("Prediction Probabilities:", probabilities)</code></pre>
 
         if (isManualClick && btn) {
           const latencyBadge = document.getElementById("tabpfnLatencyBadge");
-          if (latencyBadge) latencyBadge.textContent = "Speed: 16 ms (CPU) • Inference Complete";
-          btn.textContent = "Prediction Updated!";
+          if (latencyBadge) {
+            latencyBadge.textContent = "Speed: 16 ms (CPU) \u2022 Inference Complete";
+            latencyBadge.className = "badge-win";
+          }
+          btn.textContent = "Prediction Complete!";
           setTimeout(() => {
             btn.disabled = false;
             btn.textContent = origText;
