@@ -422,26 +422,47 @@
       border-radius: 8px;
       padding: 1.25rem;
       font-size: 0.9375rem;
-      line-height: 1.9;
+      line-height: 2.2;
       min-height: 180px;
       white-space: pre-wrap;
-      word-break: break-word;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .awaiting-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+      color: var(--text-dim);
+      text-align: center;
+      font-size: 0.9375rem;
+      line-height: 1.6;
     }
 
     /* Span marks */
     .gl-mark {
-      padding: 0.15rem 0.45rem;
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
       border-radius: 4px;
       font-weight: 600;
       border-bottom: 2px solid;
+      line-height: 1.5;
+      margin: 0 0.15rem;
+      vertical-align: baseline;
+      white-space: normal;
     }
 
     .gl-tag {
+      display: inline-block;
       font-size: 0.625rem;
       font-family: var(--font-mono);
       text-transform: uppercase;
       margin-left: 0.35rem;
       opacity: 0.9;
+      font-weight: 700;
+      vertical-align: middle;
+      letter-spacing: 0.03em;
     }
 
     .mark-party { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border-color: #3b82f6; }
@@ -721,8 +742,10 @@
           </div>
           <div class="panel-body">
             <label>Highlighted Text</label>
-            <div class="output-viewer" id="glinerOutput" style="color:var(--text-dim); display:flex; align-items:center; justify-content:center; text-align:center;">
-              Click 'Run GLiNER Extraction' to analyze the document.
+            <div class="output-viewer" id="glinerOutput">
+              <div class="awaiting-placeholder">
+                Click 'Run GLiNER Extraction' to analyze the document.
+              </div>
             </div>
 
             <label style="margin-top:0.5rem;">Extracted Entities List</label>
@@ -1001,7 +1024,7 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       }
       const outViewer = document.getElementById("glinerOutput");
       if (outViewer) {
-        outViewer.innerHTML = `<div style="color:var(--text-dim); display:flex; align-items:center; justify-content:center; text-align:center; height:100%; min-height:140px;">Preset loaded. Click <strong>Run GLiNER Extraction</strong> to find entities.</div>`;
+        outViewer.innerHTML = '<div class="awaiting-placeholder">Preset loaded. Click <strong>Run GLiNER Extraction</strong> to find entities.</div>';
       }
       const tbody = document.getElementById("glinerTableBody");
       if (tbody) {
