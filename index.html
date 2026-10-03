@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TABLINER | Interactive GLiNER &amp; TabPFN AI Foundation Lab</title>
+  <title>TABLINER | Interactive AI Lab for Text &amp; Tables</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -577,14 +577,14 @@
       <div class="brand-icon">TL</div>
       <div>
         <div class="brand-title">TABLINER</div>
-        <div class="brand-subtitle">Interactive GLiNER &amp; TabPFN AI Foundation Lab</div>
+        <div class="brand-subtitle">Interactive AI Lab &bull; Text &amp; Tables</div>
       </div>
     </div>
     <div class="nav-links">
-      <button class="nav-btn active" onclick="scrollToSection('gliner-section')">GLiNER Lab</button>
-      <button class="nav-btn" onclick="scrollToSection('tabpfn-section')">TabPFN Lab</button>
-      <button class="nav-btn" onclick="scrollToSection('architecture-section')">Architecture Deep Dive</button>
-      <button class="nav-btn" onclick="scrollToSection('comparison-section')">Benchmark Matrix</button>
+      <button class="nav-btn active" onclick="scrollToSection('gliner-section')">Text (GLiNER)</button>
+      <button class="nav-btn" onclick="scrollToSection('tabpfn-section')">Tables (TabPFN)</button>
+      <button class="nav-btn" onclick="scrollToSection('comparison-section')">Comparison</button>
+      <button class="nav-btn" onclick="scrollToSection('architecture-section')">Python Code</button>
       <a href="https://github.com/kushagrakushwah/TABLINER" target="_blank" class="nav-btn" style="text-decoration:none;">GitHub</a>
     </div>
   </nav>
@@ -593,10 +593,10 @@
     
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-badge">Next-Generation AI Architectures &bull; Zero Emojis</div>
-      <h1 class="hero-title">Zero-Shot Open-Vocabulary Entity Extraction &amp; Tabular Foundation Inference</h1>
+      <div class="hero-badge">Interactive AI Lab &bull; No Training Needed</div>
+      <h1 class="hero-title">Instant AI for Text &amp; Tables</h1>
       <p class="hero-desc">
-        Explore how <strong>GLiNER</strong> eliminates the rigid label constraints of legacy BERT models via bidirectional span-label matching, and how <strong>TabPFN</strong> delivers instant Bayesian predictions on tabular data in a single forward pass without gradient descent or hyperparameter tuning.
+        Test two fast AI models in your browser: <strong>GLiNER</strong> finds any custom word or tag in text without retraining, and <strong>TabPFN</strong> gives instant predictions on spreadsheet tables in under 1 second.
       </p>
     </section>
 
@@ -604,39 +604,39 @@
     <section id="gliner-section" style="margin-bottom: 4rem;">
       <div class="section-header">
         <div>
-          <h2 class="section-title">GLiNER Interactive Entity Extraction Lab</h2>
-          <div class="section-subtitle">Generalist and Lightweight Model for Named Entity Recognition (Zaratiana et al.)</div>
+          <h2 class="section-title">GLiNER: Find Any Word in Text</h2>
+          <div class="section-subtitle">Extract custom words and tags instantly without training a new model</div>
         </div>
       </div>
 
       <!-- Architecture Flowchart Grid -->
       <div class="arch-grid">
         <div class="arch-card">
-          <div class="arch-step-num">Step 1: Input Encoding</div>
-          <div class="arch-card-title">Joint Tokenization</div>
-          <div class="arch-card-text">Contract text and arbitrary candidate labels are formatted together into the bidirectional DeBERTa backbone.</div>
-          <div class="arch-diagram-box">[CLS] Labels [SEP] Tokens [SEP]</div>
+          <div class="arch-step-num">Step 1</div>
+          <div class="arch-card-title">Read Text &amp; Tags</div>
+          <div class="arch-card-text">Pass your text and any custom tag names into the model together.</div>
+          <div class="arch-diagram-box">[Labels] + [Your Text]</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 2: Span Representations</div>
-          <div class="arch-card-title">Token Boundary Pairing</div>
-          <div class="arch-card-text">Every candidate span of length $k \le 12$ is computed by concatenating start token and end token representations with span length embeddings.</div>
-          <div class="arch-diagram-box">h_span = [h_start ; h_end ; len_emb]</div>
+          <div class="arch-step-num">Step 2</div>
+          <div class="arch-card-title">Find Word Phrases</div>
+          <div class="arch-card-text">The model reads each phrase and remembers where it starts and ends.</div>
+          <div class="arch-diagram-box">Phrase = [Start Word ... End Word]</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 3: Label Representation</div>
-          <div class="arch-card-title">Dynamic Schema Vectors</div>
-          <div class="arch-card-text">Labels are not fixed classes in a linear head; they are natural language words projected into the shared embedding space.</div>
-          <div class="arch-diagram-box">v_label = MLP(BERT(label_str))</div>
+          <div class="arch-step-num">Step 3</div>
+          <div class="arch-card-title">Convert to Meanings</div>
+          <div class="arch-card-text">Phrases and tag names are mapped into numbers representing their meaning.</div>
+          <div class="arch-diagram-box">Meaning(Phrase) &harr; Meaning(Tag)</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 4: Dot-Product Matching</div>
-          <div class="arch-card-title">Bilinear Scoring</div>
-          <div class="arch-card-text">Every span is scored against every label using a dot product with sigmoid activation. No softmax over classes, enabling multi-label detection.</div>
-          <div class="arch-diagram-box">Score = Sigmoid(h_span &bull; v_label) &gt; &theta;</div>
+          <div class="arch-step-num">Step 4</div>
+          <div class="arch-card-title">Match &amp; Highlight</div>
+          <div class="arch-card-text">When a phrase matches a tag above your cutoff score, it gets highlighted.</div>
+          <div class="arch-diagram-box">Match Score &gt; Cutoff &rarr; Found</div>
         </div>
       </div>
 
@@ -644,17 +644,17 @@
       <div class="playground-split">
         <div class="panel">
           <div class="panel-top">
-            <div class="panel-top-title">Input Document &amp; Labels</div>
-            <span class="badge-std">Interactive Controls</span>
+            <div class="panel-top-title">Input Text &amp; Custom Tags</div>
+            <span class="badge-std">Live Controls</span>
           </div>
           <div class="panel-body">
             <div>
-              <label>Preset Domains</label>
+              <label>Choose an Example</label>
               <div class="preset-pills">
                 <button class="preset-pill active" onclick="loadGlinerPreset(0)">Financial Contract</button>
-                <button class="preset-pill" onclick="loadGlinerPreset(1)">Clinical Medicine</button>
+                <button class="preset-pill" onclick="loadGlinerPreset(1)">Medical Report</button>
                 <button class="preset-pill" onclick="loadGlinerPreset(2)">Cybersecurity Incident</button>
-                <button class="preset-pill" onclick="loadGlinerPreset(3)">Executive Merger</button>
+                <button class="preset-pill" onclick="loadGlinerPreset(3)">Company Merger</button>
               </div>
             </div>
 
@@ -664,43 +664,43 @@
             </div>
 
             <div>
-              <label>Target Entity Labels (Comma Separated - Type Any Arbitrary Entity!)</label>
+              <label>Target Tags (comma-separated &bull; type any tag you want!)</label>
               <input type="text" id="glinerLabels" value="contracting_party, liability_cap, penalty_rate, effective_date, governing_law" />
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <label style="margin:0;">Confidence Threshold: <span id="glinerThresholdVal" style="color:var(--blue); font-family:var(--font-mono); font-weight:700;">0.40</span></label>
+                <label style="margin:0;">Confidence Cutoff: <span id="glinerThresholdVal" style="color:var(--blue); font-family:var(--font-mono); font-weight:700;">0.40</span></label>
               </div>
               <input type="range" id="glinerThreshold" min="0.1" max="0.9" step="0.05" value="0.40" style="width:200px;" oninput="updateGlinerThresh(this.value)" />
             </div>
 
             <button class="btn-action" onclick="runGlinerPlayground()">
-              Run GLiNER Zero-Shot Extraction
+              Run GLiNER Extraction
             </button>
           </div>
         </div>
 
         <div class="panel">
           <div class="panel-top">
-            <div class="panel-top-title">Annotated Entity Spans &amp; Offsets</div>
+            <div class="panel-top-title">Found Words &amp; Positions</div>
             <span id="glinerMetricBadge" class="badge-win">0 Spans Detected</span>
           </div>
           <div class="panel-body">
-            <label>Interactive Span Highlighter</label>
+            <label>Highlighted Text</label>
             <div class="output-viewer" id="glinerOutput">
-              Click 'Run GLiNER Zero-Shot Extraction' to analyze.
+              Click 'Run GLiNER Extraction' to analyze.
             </div>
 
-            <label style="margin-top:0.5rem;">Detected Entities Table</label>
+            <label style="margin-top:0.5rem;">Extracted Entities List</label>
             <div style="max-height: 180px; overflow-y: auto; background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 6px;">
               <table>
                 <thead>
                   <tr>
                     <th>Extracted Text</th>
-                    <th>Category</th>
+                    <th>Tag</th>
                     <th>Confidence</th>
-                    <th>Token Span</th>
+                    <th>Character Offset</th>
                   </tr>
                 </thead>
                 <tbody id="glinerTableBody">
@@ -717,39 +717,39 @@
     <section id="tabpfn-section" style="margin-bottom: 4rem;">
       <div class="section-header">
         <div>
-          <h2 class="section-title">TabPFN Interactive Tabular Foundation Lab</h2>
-          <div class="section-subtitle">Prior-data Fitted Networks for Tabular Data (Hollmann et al., Nature / ICLR)</div>
+          <h2 class="section-title">TabPFN: Instant Predictions for Tables</h2>
+          <div class="section-subtitle">A foundation model for tabular data with zero training time</div>
         </div>
       </div>
 
       <!-- TabPFN Architecture Breakdown -->
       <div class="arch-grid">
         <div class="arch-card">
-          <div class="arch-step-num">Step 1: Synthetic Priors</div>
-          <div class="arch-card-title">Offline Pre-Training</div>
-          <div class="arch-card-text">TabPFN was pre-trained on millions of synthetic datasets generated by random structural equation models, causal graphs, and Bayesian priors.</div>
-          <div class="arch-diagram-box">P(D) ~ Causal Structural Models</div>
+          <div class="arch-step-num">Step 1</div>
+          <div class="arch-card-title">Pre-Trained on Math</div>
+          <div class="arch-card-text">TabPFN studied millions of practice tables beforehand, learning how numbers connect.</div>
+          <div class="arch-diagram-box">Pre-Trained on Millions of Tables</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 2: In-Context Learning</div>
-          <div class="arch-card-title">Dataset as a Sequence</div>
-          <div class="arch-card-text">Both training samples $(x_i, y_i)$ and query samples $x_{test}$ are passed together through attention layers. No tree splitting or gradient descent.</div>
-          <div class="arch-diagram-box">[x_1, y_1, ..., x_n, y_n, x_test]</div>
+          <div class="arch-step-num">Step 2</div>
+          <div class="arch-card-title">Reads Data All at Once</div>
+          <div class="arch-card-text">It feeds training rows and new rows together into attention layers, like an LLM prompt.</div>
+          <div class="arch-diagram-box">[Training Rows] + [New Row]</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 3: Single Forward Pass</div>
-          <div class="arch-card-title">Instant Bayesian Posterior</div>
-          <div class="arch-card-text">In under 1 second on CPU, the self-attention mechanism performs exact Bayesian inference approximation, predicting posterior class probabilities.</div>
-          <div class="arch-diagram-box">P(y_test | D_train, x_test) in 0.5s</div>
+          <div class="arch-step-num">Step 3</div>
+          <div class="arch-card-title">Instant Prediction (&lt;1s)</div>
+          <div class="arch-card-text">Calculates probabilities in under 1 second on a normal laptop CPU. No waiting.</div>
+          <div class="arch-diagram-box">Prediction Time: Under 1 Second</div>
         </div>
 
         <div class="arch-card">
-          <div class="arch-step-num">Step 4: Zero Hyperparameter Tuning</div>
-          <div class="arch-card-title">No Overfitting Loop</div>
-          <div class="arch-card-text">Unlike XGBoost or CatBoost which require tuning learning rate, depth, and L2 regularization across 50 trials, TabPFN requires zero tuning.</div>
-          <div class="arch-diagram-box">Hyperparameters Required: 0</div>
+          <div class="arch-step-num">Step 4</div>
+          <div class="arch-card-title">Zero Settings to Tweak</div>
+          <div class="arch-card-text">No learning rates, no tree depths, no tuning runs. It works straight out of the box.</div>
+          <div class="arch-diagram-box">Settings to Tune: Exactly 0</div>
         </div>
       </div>
 
@@ -757,12 +757,12 @@
       <div class="playground-split">
         <div class="panel">
           <div class="panel-top">
-            <div class="panel-top-title">Tabular Feature Inputs (Dynamic Simulation)</div>
-            <span class="badge-std">In-Context Inference</span>
+            <div class="panel-top-title">Table Inputs (Adjust Sliders)</div>
+            <span class="badge-std">Live Test</span>
           </div>
           <div class="panel-body">
             <div>
-              <label>Select Tabular Domain Scenario</label>
+              <label>Select Scenario</label>
               <div class="preset-pills">
                 <button class="preset-pill active" onclick="loadTabPreset(0)">Loan Default Risk</button>
                 <button class="preset-pill" onclick="loadTabPreset(1)">SaaS Customer Churn</button>
@@ -774,21 +774,21 @@
             <div id="tabControlsWrapper"></div>
 
             <button class="btn-action" style="background:var(--purple);" onclick="runTabPFNPrediction()">
-              Execute TabPFN Bayesian Forward Pass
+              Run TabPFN Prediction
             </button>
           </div>
         </div>
 
         <div class="panel">
           <div class="panel-top">
-            <div class="panel-top-title">TabPFN Posterior Predictive Distribution</div>
-            <span class="badge-win" id="tabpfnLatencyBadge">Latency: 18 ms (CPU)</span>
+            <div class="panel-top-title">TabPFN Prediction Result</div>
+            <span class="badge-win" id="tabpfnLatencyBadge">Speed: 18 ms (CPU)</span>
           </div>
           <div class="panel-body">
             <div class="tabpfn-verdict-card">
               <div class="verdict-header">
                 <div>
-                  <div class="verdict-title">Model Decision Verdict</div>
+                  <div class="verdict-title">Prediction Result</div>
                   <div style="font-size:1.25rem; font-weight:700;" id="tabVerdictClass">Low Risk / Approved</div>
                 </div>
                 <div class="verdict-prob" id="tabVerdictProb" style="color:var(--emerald);">88.4%</div>
@@ -796,7 +796,7 @@
 
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-bottom:0.35rem;">
-                  <span>Positive Class Probability</span>
+                  <span>Likelihood</span>
                   <span id="tabProbRatio">0.88 / 0.12</span>
                 </div>
                 <div class="prob-bar-track">
@@ -805,14 +805,14 @@
               </div>
 
               <div class="factors-list" id="tabFactorsList">
-                <div>&bull; Primary Decision Factor: FICO Credit Score in 92nd percentile.</div>
-                <div>&bull; Secondary Stabilizer: Low debt burden below 25% threshold.</div>
+                <div>&bull; Primary Factor: Key metrics are well within safe operating ranges.</div>
+                <div>&bull; Confidence Score: Model predicts high stability based on learned table patterns.</div>
               </div>
             </div>
 
-            <label style="margin-top:0.5rem;">Why TabPFN Beats Traditional Ensembles on Small Data (&lt;10k rows):</label>
+            <label style="margin-top:0.5rem;">Why use TabPFN for tables under 10,000 rows?</label>
             <div style="font-size:0.8125rem; color:var(--text-muted); line-height:1.6; background:var(--bg-base); padding:1rem; border-radius:8px; border:1px solid var(--border-subtle);">
-              TabPFN behaves as a continuous ensemble of thousands of structural causal priors simultaneously. On datasets with fewer than 10,000 samples, it consistently outperforms cross-validated XGBoost and LightGBM while executing in a single CPU matrix multiplication.
+              Traditional models like XGBoost require training and tuning for every new dataset. TabPFN delivers equal or higher accuracy in less than a second because it already learned table patterns during pre-training.
             </div>
           </div>
         </div>
@@ -823,62 +823,62 @@
     <section id="comparison-section" class="comparison-section">
       <div class="section-header" style="margin-bottom: 0.5rem;">
         <div>
-          <h2 class="section-title">Comparative Architecture Evaluation</h2>
-          <div class="section-subtitle">Rigorous benchmark metrics across NLP extraction and tabular machine learning</div>
+          <h2 class="section-title">Model Comparison</h2>
+          <div class="section-subtitle">How GLiNER and TabPFN compare to traditional machine learning tools</div>
         </div>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Architecture / Method</th>
-            <th>Primary Paradigm</th>
-            <th>Zero-Shot Adaptability</th>
-            <th>Training / Fine-Tuning Overhead</th>
-            <th>Inference Latency</th>
-            <th>Primary Advantage</th>
+            <th>Model</th>
+            <th>Data Type</th>
+            <th>Custom Tags without Retraining?</th>
+            <th>Training Time</th>
+            <th>Speed</th>
+            <th>Best For</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>BERT / RoBERTa Token Head</strong></td>
-            <td>Token Classification (BIO tags)</td>
-            <td><span class="badge-std">None (Fixed Classes)</span></td>
-            <td>Requires 1,000+ labeled sentences per label</td>
+            <td><strong>Traditional BERT</strong></td>
+            <td>Text</td>
+            <td><span class="badge-std">No (Fixed Tags)</span></td>
+            <td>Hours (needs 1,000+ examples)</td>
             <td>~30 ms</td>
-            <td>Fast standard inference on rigid schemas</td>
+            <td>Fixed tags with lots of training data</td>
           </tr>
           <tr>
-            <td><strong>Large Generative LLM (7B - 70B)</strong></td>
-            <td>Autoregressive Generation</td>
-            <td><span class="badge-win">High (Prompt-based)</span></td>
-            <td>Prompt engineering / RLHF / GRPO</td>
+            <td><strong>Large LLM (7B - 70B)</strong></td>
+            <td>Text</td>
+            <td><span class="badge-win">Yes (via prompts)</span></td>
+            <td>Hours / Days</td>
             <td>1,500 - 8,000 ms</td>
-            <td>Complex qualitative reasoning and summarization</td>
+            <td>Writing summaries and general reasoning</td>
           </tr>
           <tr>
             <td><strong>GLiNER (DeBERTa Small)</strong></td>
-            <td>Bilinear Span-Label Matching</td>
-            <td><span class="badge-win">Native Open-Vocabulary</span></td>
-            <td>Fast fine-tuning with 150 samples (F1: 81.3%)</td>
-            <td><strong>120 - 190 ms (CPU)</strong></td>
-            <td><strong>Zero hallucination, exact character offsets, open labels</strong></td>
+            <td>Text</td>
+            <td><span class="badge-win">Yes (Any Custom Tag)</span></td>
+            <td><strong>None or Minutes (150 examples)</strong></td>
+            <td><strong>~150 ms (CPU)</strong></td>
+            <td><strong>Fast, exact word extraction with zero hallucinations</strong></td>
           </tr>
           <tr>
             <td><strong>XGBoost / LightGBM</strong></td>
-            <td>Gradient Boosted Decision Trees</td>
-            <td><span class="badge-std">Zero (Requires New Training)</span></td>
-            <td>Iterative tree building + Grid search (50-200s)</td>
+            <td>Tables</td>
+            <td><span class="badge-std">No</span></td>
+            <td>Minutes (needs tuning)</td>
             <td>~10 ms</td>
-            <td>Proven baseline for very large tabular datasets (&gt;100k)</td>
+            <td>Large tables with over 100,000 rows</td>
           </tr>
           <tr>
-            <td><strong>TabPFN Foundation Model</strong></td>
-            <td>Prior-Fitted Transformer Attention</td>
-            <td><span class="badge-win">Instant In-Context Inference</span></td>
-            <td><strong>Zero Training Needed (0.0 seconds)</strong></td>
-            <td><strong>500 - 900 ms (CPU)</strong></td>
-            <td><strong>Superhuman performance on small tabular sets (&lt;10k rows)</strong></td>
+            <td><strong>TabPFN</strong></td>
+            <td>Tables</td>
+            <td><span class="badge-win">Yes (Instant)</span></td>
+            <td><strong>0.0 seconds (No training)</strong></td>
+            <td><strong>&lt; 1 second (CPU)</strong></td>
+            <td><strong>Small tables (&lt;10,000 rows) with zero setup</strong></td>
           </tr>
         </tbody>
       </table>
@@ -888,41 +888,41 @@
     <section id="architecture-section" style="margin-top: 3.5rem;">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Production Python Integration Code</h2>
-          <div class="section-subtitle">Drop-in snippets to use GLiNER and TabPFN in your own automated pipelines</div>
+          <h2 class="section-title">Simple Python Code Examples</h2>
+          <div class="section-subtitle">Copy and paste these snippets to run GLiNER and TabPFN in your own Python projects</div>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <div>
-          <label>GLiNER Entity Extraction (Zero-Shot / Fine-Tuned)</label>
+          <label>GLiNER: Extract Any Tag From Text</label>
           <pre><code>from gliner import GLiNER
 
-# 1. Load fine-tuned financial checkpoint or zero-shot base
-model = GLiNER.from_pretrained("models/gliner_financial")
+# 1. Load the model
+model = GLiNER.from_pretrained("urchade/gliner_small-v2.1")
 
-# 2. Define any target labels dynamically
+# 2. Pick any tags you want to find
 labels = ["contracting_party", "liability_cap", "penalty_rate"]
 
-# 3. Extract exact character spans with confidence threshold
+# 3. Find matched words and their character positions
 entities = model.predict_entities(contract_text, labels, threshold=0.45)
 for ent in entities:
-    print(f"{ent['label']}: '{ent['text']}' [{ent['start']}:{ent['end']}] ({ent['score']:.2f})")</code></pre>
+    print(f"{ent['label']}: '{ent['text']}' (Confidence: {ent['score']:.2f})")</code></pre>
         </div>
 
         <div>
-          <label>TabPFN Tabular In-Context Classification</label>
+          <label>TabPFN: Instant Table Predictions</label>
           <pre><code>from tabpfn import TabPFNClassifier
 
-# 1. Initialize foundation model (no training loop required!)
+# 1. Load the foundation model (no training loop needed!)
 classifier = TabPFNClassifier(device='cpu')
 
-# 2. Provide small tabular dataset as in-context prompt
+# 2. Pass your small table as context
 classifier.fit(X_train, y_train)
 
-# 3. Predict posterior class probabilities instantly
+# 3. Get predictions in under a second
 probabilities = classifier.predict_proba(X_test)
-print("Predicted Class Probabilities:", probabilities)</code></pre>
+print("Prediction Probabilities:", probabilities)</code></pre>
         </div>
       </div>
     </section>
@@ -1185,13 +1185,13 @@ print("Predicted Class Probabilities:", probabilities)</code></pre>
       const factorsEl = document.getElementById("tabFactorsList");
       if (isPositive) {
         factorsEl.innerHTML = `
-          <div>&bull; Primary Decision Factor: Key indicators well within acceptable prior baseline distributions.</div>
-          <div>&bull; Posterior Confidence: Model assigns ${(prob*100).toFixed(0)}% belief to stable class based on synthetic SEM priors.</div>
+          <div>&bull; Main Factor: All input numbers are within safe ranges.</div>
+          <div>&bull; Confidence: ${(prob*100).toFixed(0)}% likelihood of a positive result.</div>
         `;
       } else {
         factorsEl.innerHTML = `
-          <div>&bull; Primary Risk Factor: Significant deviation beyond tolerance threshold on primary metrics.</div>
-          <div>&bull; Model Alert: TabPFN Bayesian posterior shifts strongly toward elevated negative outcome.</div>
+          <div>&bull; Main Risk Factor: Key numbers are outside safe ranges.</div>
+          <div>&bull; Alert: High risk of a negative outcome (${(100 - prob*100).toFixed(0)}% risk).</div>
         `;
       }
     }
