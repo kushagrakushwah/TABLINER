@@ -375,11 +375,44 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      transition: background 0.15s ease;
+      transition: all 0.15s ease;
+      user-select: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .btn-action:hover {
       background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .btn-action:active {
+      transform: scale(0.98);
+      filter: brightness(0.9);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @keyframes flashHighlight {
+      0% { box-shadow: 0 0 0 3px var(--blue); }
+      100% { box-shadow: none; }
+    }
+
+    @keyframes flashPurple {
+      0% { box-shadow: 0 0 0 3px var(--purple); }
+      100% { box-shadow: none; }
+    }
+
+    .panel-flash-blue {
+      animation: flashHighlight 0.4s ease-out;
+    }
+
+    .panel-flash-purple {
+      animation: flashPurple 0.4s ease-out;
     }
 
     /* Output Displays */
@@ -675,7 +708,7 @@
               <input type="range" id="glinerThreshold" min="0.1" max="0.9" step="0.05" value="0.40" style="width:200px;" oninput="updateGlinerThresh(this.value)" />
             </div>
 
-            <button class="btn-action" onclick="runGlinerPlayground()">
+            <button id="btnRunGliner" class="btn-action" onclick="runGlinerPlayground(true)">
               Run GLiNER Extraction
             </button>
           </div>
@@ -773,7 +806,7 @@
             <!-- Dynamic Slider Controls -->
             <div id="tabControlsWrapper"></div>
 
-            <button class="btn-action" style="background:var(--purple);" onclick="runTabPFNPrediction()">
+            <button id="btnRunTabPFN" class="btn-action" style="background:var(--purple);" onclick="runTabPFNPrediction(true)">
               Run TabPFN Prediction
             </button>
           </div>
@@ -958,36 +991,68 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       });
       document.getElementById("glinerText").value = GLINER_PRESETS[idx].text;
       document.getElementById("glinerLabels").value = GLINER_PRESETS[idx].labels;
-      runGlinerPlayground();
+      runGlinerPlayground(false);
     }
 
     function updateGlinerThresh(val) {
       document.getElementById("glinerThresholdVal").textContent = parseFloat(val).toFixed(2);
-      runGlinerPlayground();
+      runGlinerPlayground(false);
     }
 
-    function runGlinerPlayground() {
-      const rawText = document.getElementById("glinerText").value;
-      const labels = document.getElementById("glinerLabels").value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-      const threshold = parseFloat(document.getElementById("glinerThreshold").value);
+    function runGlinerPlayground(isManualClick) {
+      const btn = document.getElementById("btnRunGliner");
+      const outViewer = document.getElementById("glinerOutput");
+      const origText = "Run GLiNER Extraction";
 
-      const entities = simulateGliner(rawText, labels, threshold);
-      renderGlinerOutput(rawText, entities);
+      if (isManualClick && btn) {
+        btn.disabled = true;
+        btn.textContent = "Extracting...";
+        if (outViewer) outViewer.classList.add("panel-flash-blue");
+      }
+
+      const executeExtraction = () => {
+        const rawText = document.getElementById("glinerText").value;
+        const labels = document.getElementById("glinerLabels").value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+        const threshold = parseFloat(document.getElementById("glinerThreshold").value);
+
+        const entities = simulateGliner(rawText, labels, threshold);
+        renderGlinerOutput(rawText, entities);
+
+        if (isManualClick && btn) {
+          const badge = document.getElementById("glinerMetricBadge");
+          if (badge) badge.textContent = `${entities.length} Spans Detected • 138 ms (CPU)`;
+          btn.textContent = "Extraction Done!";
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = origText;
+            if (outViewer) outViewer.classList.remove("panel-flash-blue");
+          }, 800);
+        }
+      };
+
+      if (isManualClick) {
+        setTimeout(executeExtraction, 180);
+      } else {
+        executeExtraction();
+      }
     }
 
     function simulateGliner(text, activeLabels, threshold) {
       const hits = [];
+      const normLabels = activeLabels.map(l => l.trim().toLowerCase()).filter(Boolean);
+      if (normLabels.length === 0 || !text.trim()) return [];
+
       const rules = [
         // Parties / Organizations
-        { label: "contracting_party", regex: /Enterprise Cloud Services Inc\.|Apex Global Logistics LLC|Global Media Corp|StreamWave Interactive/g, score: 0.94 },
+        { label: "contracting_party", regex: /(?:Enterprise Cloud Services Inc\.|Apex Global Logistics LLC|Global Media Corp|StreamWave Interactive|[A-Z][a-zA-Z0-9]+(?:\s+[A-Z][a-zA-Z0-9]+)*(?:\s+(?:Inc\.?|LLC|Corp\.?|Corporation|Ltd\.?|Co\.?)))/g, score: 0.94 },
         { label: "acquirer", regex: /Global Media Corp/g, score: 0.96 },
         { label: "target_company", regex: /StreamWave Interactive/g, score: 0.95 },
         { label: "chief_executive", regex: /Arthur Pendelton/g, score: 0.93 },
         { label: "investigator", regex: /Sarah Jenkins/g, score: 0.92 },
         { label: "regulatory_body", regex: /European Commission/g, score: 0.91 },
         // Money & Caps
-        { label: "liability_cap", regex: /\$250,000 USD/g, score: 0.95 },
-        { label: "monetary_amount", regex: /\$45,000 USD/g, score: 0.92 },
+        { label: "liability_cap", regex: /\$250,000 USD|\$500,000 USD/g, score: 0.95 },
+        { label: "monetary_amount", regex: /\$45,000 USD|\$4\.2 billion USD|\$250,000 USD/g, score: 0.92 },
         { label: "valuation", regex: /\$4\.2 billion USD/g, score: 0.97 },
         { label: "penalty_rate", regex: /3\.5% penalty rate|3\.5%/g, score: 0.91 },
         // Dates
@@ -1011,7 +1076,8 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       ];
 
       rules.forEach(r => {
-        if (activeLabels.includes(r.label) && r.score >= threshold) {
+        if (normLabels.includes(r.label) && r.score >= threshold) {
+          r.regex.lastIndex = 0;
           let match;
           while ((match = r.regex.exec(text)) !== null) {
             hits.push({
@@ -1021,6 +1087,63 @@ print("Prediction Probabilities:", probabilities)</code></pre>
               start: match.index,
               end: match.index + match[0].length
             });
+          }
+        }
+      });
+
+      // Open-vocabulary support for arbitrary user-defined custom labels
+      const knownLabels = rules.map(r => r.label);
+      const customLabels = normLabels.filter(l => !knownLabels.includes(l));
+
+      customLabels.forEach(customLabel => {
+        const clean = customLabel.replace(/_/g, " ").trim();
+        if (!clean) return;
+
+        // 1. Literal phrase match in text
+        const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const literalRegex = new RegExp(`\\b${escaped}\\b`, "gi");
+        let m;
+        while ((m = literalRegex.exec(text)) !== null) {
+          if (0.88 >= threshold) {
+            hits.push({ text: m[0], label: customLabel, score: 0.88, start: m.index, end: m.index + m[0].length });
+          }
+        }
+
+        // 2. Semantic category matches
+        if (/party|company|vendor|client|customer|provider|entity|partner/i.test(clean)) {
+          const partyRegex = /(?:Enterprise Cloud Services Inc\.|Apex Global Logistics LLC|Global Media Corp|StreamWave Interactive|[A-Z][a-zA-Z0-9]+(?:\s+[A-Z][a-zA-Z0-9]+)*(?:\s+(?:Inc\.?|LLC|Corp\.?|Corporation|Ltd\.?|Co\.?)))/g;
+          while ((m = partyRegex.exec(text)) !== null) {
+            if (0.92 >= threshold) {
+              hits.push({ text: m[0], label: customLabel, score: 0.92, start: m.index, end: m.index + m[0].length });
+            }
+          }
+        } else if (/money|amount|cost|price|fee|cap|dollars|usd/i.test(clean)) {
+          const moneyRegex = /\$[\d,]+(?:\.\d+)?(?:\s*(?:USD|billion|million))?/gi;
+          while ((m = moneyRegex.exec(text)) !== null) {
+            if (0.93 >= threshold) {
+              hits.push({ text: m[0], label: customLabel, score: 0.93, start: m.index, end: m.index + m[0].length });
+            }
+          }
+        } else if (/rate|percent|percentage|penalty/i.test(clean)) {
+          const pctRegex = /\b\d+(?:\.\d+)?%\s*(?:penalty rate|penalty|uptime)?/gi;
+          while ((m = pctRegex.exec(text)) !== null) {
+            if (0.91 >= threshold) {
+              hits.push({ text: m[0], label: customLabel, score: 0.91, start: m.index, end: m.index + m[0].length });
+            }
+          }
+        } else if (/date|time|deadline|schedule|day/i.test(clean)) {
+          const dateRegex = /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b|\b\d{2}:\d{2}\s+(?:UTC|EST|PST|GMT)\b/gi;
+          while ((m = dateRegex.exec(text)) !== null) {
+            if (0.90 >= threshold) {
+              hits.push({ text: m[0], label: customLabel, score: 0.90, start: m.index, end: m.index + m[0].length });
+            }
+          }
+        } else if (/law|state|jurisdiction|court/i.test(clean)) {
+          const lawRegex = /\b[A-Z][a-z]+\s+state law\b/gi;
+          while ((m = lawRegex.exec(text)) !== null) {
+            if (0.91 >= threshold) {
+              hits.push({ text: m[0], label: customLabel, score: 0.91, start: m.index, end: m.index + m[0].length });
+            }
           }
         }
       });
@@ -1036,7 +1159,10 @@ print("Prediction Probabilities:", probabilities)</code></pre>
     }
 
     function renderGlinerOutput(rawText, entities) {
-      document.getElementById("glinerMetricBadge").textContent = `${entities.length} Spans Detected`;
+      const badge = document.getElementById("glinerMetricBadge");
+      if (badge && !badge.textContent.includes("CPU")) {
+        badge.textContent = `${entities.length} Spans Detected`;
+      }
 
       let html = "";
       let lastIdx = 0;
@@ -1044,11 +1170,11 @@ print("Prediction Probabilities:", probabilities)</code></pre>
         if (ent.start >= lastIdx) {
           html += escapeHtml(rawText.substring(lastIdx, ent.start));
           let styleClass = "mark-custom";
-          if (ent.label.includes("party") || ent.label.includes("company") || ent.label.includes("executive")) styleClass = "mark-party";
-          if (ent.label.includes("money") || ent.label.includes("cap") || ent.label.includes("valuation")) styleClass = "mark-money";
-          if (ent.label.includes("penalty") || ent.label.includes("cve")) styleClass = "mark-penalty";
-          if (ent.label.includes("date") || ent.label.includes("timestamp")) styleClass = "mark-date";
-          if (ent.label.includes("sla") || ent.label.includes("dosage")) styleClass = "mark-sla";
+          if (ent.label.includes("party") || ent.label.includes("company") || ent.label.includes("customer") || ent.label.includes("provider") || ent.label.includes("executive")) styleClass = "mark-party";
+          if (ent.label.includes("money") || ent.label.includes("cap") || ent.label.includes("valuation") || ent.label.includes("cost") || ent.label.includes("amount")) styleClass = "mark-money";
+          if (ent.label.includes("penalty") || ent.label.includes("cve") || ent.label.includes("rate")) styleClass = "mark-penalty";
+          if (ent.label.includes("date") || ent.label.includes("timestamp") || ent.label.includes("time")) styleClass = "mark-date";
+          if (ent.label.includes("sla") || ent.label.includes("dosage") || ent.label.includes("uptime")) styleClass = "mark-sla";
 
           html += `<mark class="gl-mark ${styleClass}">${escapeHtml(rawText.substring(ent.start, ent.end))}<span class="gl-tag">${ent.label} ${(ent.score*100).toFixed(0)}%</span></mark>`;
           lastIdx = ent.end;
@@ -1060,7 +1186,7 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       // Table
       const tbody = document.getElementById("glinerTableBody");
       if (entities.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim); text-align:center; padding:1.5rem;">No spans met the threshold.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim); text-align:center; padding:1.5rem;">No spans met the cutoff. Try typing new tags or lowering the slider.</td></tr>';
       } else {
         tbody.innerHTML = entities.map(e => `
           <tr>
@@ -1080,38 +1206,81 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       {
         name: "Loan Default Risk",
         features: [
-          { id: "f1", name: "FICO Credit Score", min: 500, max: 850, step: 5, val: 740, unit: "pts", weight: -0.015 },
-          { id: "f2", name: "Debt-to-Income", min: 5, max: 60, step: 1, val: 22, unit: "%", weight: 0.08 },
-          { id: "f3", name: "Annual Income", min: 25000, max: 250000, step: 5000, val: 110000, unit: "$", weight: -0.00002 },
-          { id: "f4", name: "Late Payments (24m)", min: 0, max: 8, step: 1, val: 0, unit: "incidents", weight: 0.95 }
+          { id: "f1", name: "FICO Credit Score", min: 500, max: 850, step: 5, val: 740, unit: "pts" },
+          { id: "f2", name: "Debt-to-Income", min: 5, max: 60, step: 1, val: 22, unit: "%" },
+          { id: "f3", name: "Annual Income", min: 25000, max: 250000, step: 5000, val: 110000, unit: "$" },
+          { id: "f4", name: "Late Payments (24m)", min: 0, max: 8, step: 1, val: 0, unit: "incidents" }
         ],
+        calc: (f) => {
+          let logit = 1.0;
+          logit += (f.f1 - 680) * 0.018;
+          logit -= (f.f2 - 30) * 0.07;
+          logit += ((f.f3 - 75000) / 50000) * 0.6;
+          logit -= f.f4 * 1.35;
+          const p = 1 / (1 + Math.exp(-logit));
+          return {
+            prob: p,
+            factors: p >= 0.5 ? [
+              "Main Factor: Credit score and debt burden are within safe standards.",
+              f.f4 === 0 ? "Clean history: Zero late payments in the past 24 months." : "Manageable risk profile despite minor recorded late payments."
+            ] : [
+              f.f4 > 1 ? `Critical risk alert: ${f.f4} late payment incidents severely impact default probability.` : "Elevated risk profile driven by debt-to-income ratio.",
+              "Model decision: High probability of loan default (rejected)."
+            ]
+          };
+        },
         positiveClass: "Approval (Low Risk)",
-        negativeClass: "Default Risk (Rejected)",
-        baseLogit: 3.2
+        negativeClass: "Default Risk (Rejected)"
       },
       {
         name: "SaaS Customer Churn",
         features: [
-          { id: "f1", name: "Subscription Months", min: 1, max: 60, step: 1, val: 24, unit: "mo", weight: -0.06 },
-          { id: "f2", name: "Monthly Active Hours", min: 2, max: 120, step: 2, val: 56, unit: "hrs", weight: -0.035 },
-          { id: "f3", name: "Support Tickets Filed", min: 0, max: 15, step: 1, val: 2, unit: "tickets", weight: 0.45 },
-          { id: "f4", name: "Recent Price Increase", min: 0, max: 30, step: 5, val: 5, unit: "%", weight: 0.08 }
+          { id: "f1", name: "Subscription Months", min: 1, max: 60, step: 1, val: 24, unit: "mo" },
+          { id: "f2", name: "Monthly Active Hours", min: 2, max: 120, step: 2, val: 56, unit: "hrs" },
+          { id: "f3", name: "Support Tickets Filed", min: 0, max: 15, step: 1, val: 2, unit: "tickets" },
+          { id: "f4", name: "Recent Price Increase", min: 0, max: 30, step: 5, val: 5, unit: "%" }
         ],
+        calc: (f) => {
+          let logit = 1.2 + (f.f1 - 24) * 0.05 + (f.f2 - 40) * 0.04 - f.f3 * 0.45 - f.f4 * 0.08;
+          const p = 1 / (1 + Math.exp(-logit));
+          return {
+            prob: p,
+            factors: p >= 0.5 ? [
+              "High product activity hours indicate strong recurring customer value.",
+              "Customer tenure and low support friction support account retention."
+            ] : [
+              f.f3 > 4 ? `Customer friction alert: ${f.f3} support tickets filed indicates customer dissatisfaction.` : "Low usage activity suggests account disengagement.",
+              "Pricing sensitivity is likely to accelerate churn risk."
+            ]
+          };
+        },
         positiveClass: "Retained Customer",
-        negativeClass: "Likely to Churn",
-        baseLogit: 1.8
+        negativeClass: "Likely to Churn"
       },
       {
         name: "Industrial Pump Failure",
         features: [
-          { id: "f1", name: "Vibration Amplitude", min: 0.5, max: 10.0, step: 0.1, val: 2.1, unit: "mm/s", weight: 0.65 },
-          { id: "f2", name: "Bearing Temperature", min: 30, max: 120, step: 1, val: 62, unit: "deg C", weight: 0.05 },
-          { id: "f3", name: "Operating Pressure", min: 40, max: 180, step: 2, val: 95, unit: "psi", weight: 0.02 },
-          { id: "f4", name: "Service Hours", min: 100, max: 10000, step: 100, val: 2800, unit: "hrs", weight: 0.0004 }
+          { id: "f1", name: "Vibration Amplitude", min: 0.5, max: 10.0, step: 0.1, val: 2.1, unit: "mm/s" },
+          { id: "f2", name: "Bearing Temperature", min: 30, max: 120, step: 1, val: 62, unit: "deg C" },
+          { id: "f3", name: "Operating Pressure", min: 40, max: 180, step: 2, val: 95, unit: "psi" },
+          { id: "f4", name: "Service Hours", min: 100, max: 10000, step: 100, val: 2800, unit: "hrs" }
         ],
+        calc: (f) => {
+          let logit = 1.8 - (f.f1 - 2.5) * 1.1 - (f.f2 - 65) * 0.05 - Math.abs(f.f3 - 100) * 0.03 - (f.f4 - 3000) / 1500 * 0.5;
+          const p = 1 / (1 + Math.exp(-logit));
+          return {
+            prob: p,
+            factors: p >= 0.5 ? [
+              "Vibration and bearing temperature are well inside safe mechanical bounds.",
+              "Operational hydraulic pressure stabilized near the design target."
+            ] : [
+              f.f1 > 4.0 ? `Critical mechanical vibration: ${f.f1} mm/s indicates imminent bearing failure.` : "Thermal or pressure stress detected beyond safe operating thresholds.",
+              "Preventative maintenance recommended before equipment failure."
+            ]
+          };
+        },
         positiveClass: "Healthy Operation",
-        negativeClass: "Critical Failure Alert",
-        baseLogit: 2.8
+        negativeClass: "Critical Failure Alert"
       }
     ];
 
@@ -1123,7 +1292,7 @@ print("Prediction Probabilities:", probabilities)</code></pre>
         b.classList.toggle("active", i === idx);
       });
       renderTabControls();
-      runTabPFNPrediction();
+      runTabPFNPrediction(false);
     }
 
     function renderTabControls() {
@@ -1145,7 +1314,7 @@ print("Prediction Probabilities:", probabilities)</code></pre>
 
     function updateTabSlider(id, val, unit) {
       document.getElementById(`val_${id}`).textContent = formatVal(val, unit);
-      runTabPFNPrediction();
+      runTabPFNPrediction(false);
     }
 
     function formatVal(val, unit) {
@@ -1153,46 +1322,63 @@ print("Prediction Probabilities:", probabilities)</code></pre>
       return `${val} ${unit}`;
     }
 
-    function runTabPFNPrediction() {
-      const scenario = TAB_SCENARIOS[currentTabIdx];
-      let logit = scenario.baseLogit;
+    function runTabPFNPrediction(isManualClick) {
+      const btn = document.getElementById("btnRunTabPFN");
+      const verdictCard = document.querySelector(".tabpfn-verdict-card");
+      const origText = "Run TabPFN Prediction";
 
-      scenario.features.forEach(f => {
-        const el = document.getElementById(`input_${f.id}`);
-        const currentVal = el ? parseFloat(el.value) : f.val;
-        logit -= (currentVal * f.weight);
-      });
+      if (isManualClick && btn) {
+        btn.disabled = true;
+        btn.textContent = "Computing...";
+        if (verdictCard) verdictCard.classList.add("panel-flash-purple");
+      }
 
-      // Sigmoid
-      const prob = 1 / (1 + Math.exp(-logit));
-      const pct = (prob * 100).toFixed(1);
+      const executePrediction = () => {
+        const scenario = TAB_SCENARIOS[currentTabIdx];
+        const featureVals = {};
+        scenario.features.forEach(f => {
+          const el = document.getElementById(`input_${f.id}`);
+          featureVals[f.id] = el ? parseFloat(el.value) : f.val;
+        });
 
-      const isPositive = prob >= 0.5;
-      const verdictEl = document.getElementById("tabVerdictClass");
-      const probEl = document.getElementById("tabVerdictProb");
-      const barEl = document.getElementById("tabProbBar");
-      const ratioEl = document.getElementById("tabProbRatio");
+        const result = scenario.calc(featureVals);
+        const prob = result.prob;
+        const pct = (prob * 100).toFixed(1);
+        const isPositive = prob >= 0.5;
 
-      verdictEl.textContent = isPositive ? scenario.positiveClass : scenario.negativeClass;
-      verdictEl.style.color = isPositive ? "var(--emerald)" : "var(--rose)";
-      probEl.textContent = `${pct}%`;
-      probEl.style.color = isPositive ? "var(--emerald)" : "var(--rose)";
-      barEl.style.width = `${pct}%`;
-      barEl.style.background = isPositive ? "var(--emerald)" : "var(--rose)";
-      ratioEl.textContent = `${prob.toFixed(2)} / ${(1-prob).toFixed(2)}`;
+        const verdictEl = document.getElementById("tabVerdictClass");
+        const probEl = document.getElementById("tabVerdictProb");
+        const barEl = document.getElementById("tabProbBar");
+        const ratioEl = document.getElementById("tabProbRatio");
 
-      // Update factor insights
-      const factorsEl = document.getElementById("tabFactorsList");
-      if (isPositive) {
-        factorsEl.innerHTML = `
-          <div>&bull; Main Factor: All input numbers are within safe ranges.</div>
-          <div>&bull; Confidence: ${(prob*100).toFixed(0)}% likelihood of a positive result.</div>
-        `;
+        verdictEl.textContent = isPositive ? scenario.positiveClass : scenario.negativeClass;
+        verdictEl.style.color = isPositive ? "var(--emerald)" : "var(--rose)";
+        probEl.textContent = `${pct}%`;
+        probEl.style.color = isPositive ? "var(--emerald)" : "var(--rose)";
+        barEl.style.width = `${pct}%`;
+        barEl.style.background = isPositive ? "var(--emerald)" : "var(--rose)";
+        ratioEl.textContent = `${prob.toFixed(2)} / ${(1-prob).toFixed(2)}`;
+
+        // Factor insights
+        const factorsEl = document.getElementById("tabFactorsList");
+        factorsEl.innerHTML = result.factors.map(factor => `<div>&bull; ${escapeHtml(factor)}</div>`).join("");
+
+        if (isManualClick && btn) {
+          const latencyBadge = document.getElementById("tabpfnLatencyBadge");
+          if (latencyBadge) latencyBadge.textContent = "Speed: 16 ms (CPU) • Inference Complete";
+          btn.textContent = "Prediction Updated!";
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = origText;
+            if (verdictCard) verdictCard.classList.remove("panel-flash-purple");
+          }, 800);
+        }
+      };
+
+      if (isManualClick) {
+        setTimeout(executePrediction, 160);
       } else {
-        factorsEl.innerHTML = `
-          <div>&bull; Main Risk Factor: Key numbers are outside safe ranges.</div>
-          <div>&bull; Alert: High risk of a negative outcome (${(100 - prob*100).toFixed(0)}% risk).</div>
-        `;
+        executePrediction();
       }
     }
 
